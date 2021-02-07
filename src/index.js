@@ -8,6 +8,7 @@ function main(){
     loadImages()
     loadBreeds()
     addBreedListener()
+    addFilterListener()
 }
 
 function loadImages(){
@@ -27,12 +28,17 @@ function renderImage(image){
     divNode.append(imgNode)
 }
 
+let allBreedData = []
+
 function loadBreeds(){
     const breedUrl = 'https://dog.ceo/api/breeds/list/all'
 
     fetch(breedUrl)
     .then(resp => resp.json())
-    .then(breeds => renderBreeds(breeds.message))
+    .then(breeds => {
+        allBreedData = breeds.message;
+        renderBreeds(breeds.message)
+    })
 }
 
 function renderBreeds(breeds){
@@ -57,11 +63,44 @@ function renderBreed(breed){
 }
 
 function addBreedListener(){
+
     const breedUl = document.getElementById('dog-breeds')
 
     breedUl.addEventListener('click', function(e){
         if (e.target.nodeName === "LI"){
             e.target.style.color="indianRed"
+        }
+    })
+}
+
+function addFilterListener(){
+    const select = document.getElementById('breed-dropdown')
+
+    select.addEventListener('change', function(e){
+        e.preventDefault
+        const ul = document.getElementById('dog-breeds')
+        ul.innerHTML=""
+        
+        const filterLetter = e.target.value
+        if (filterLetter === "View All Dogs"){
+            renderBreeds(allBreedData)
+        } else {
+            for(const key in allBreedData){
+                
+                if (allBreedData[key].length > 0){
+                    allBreedData[key].forEach(dog => {
+                        // debugger
+                        if (dog.startsWith(filterLetter))
+                            renderBreed(dog + " " + key)
+                        })
+                }
+                else {
+                    // debugger
+                    if (key.startsWith(filterLetter)){
+                        renderBreed(key)
+                    }
+                }
+            }
         }
     })
 }
